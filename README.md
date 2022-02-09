@@ -1,6 +1,9 @@
 # Windows-Log-Parser
 Windows日志分析工具，自动导出登录日志，以便进行分析。
 
+# 1.0版本
+支持导出4624、4625的登录日志
+
 # 使用说明
 ```
 Windows日志分析工具.exe Security.evtx
