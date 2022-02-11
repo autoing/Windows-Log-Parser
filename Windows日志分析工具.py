@@ -133,7 +133,9 @@ with Evtx.Evtx("Security.evtx") as log:
                 cell.alignment = alignment
 iii = 1
 with Evtx.Evtx("TerminalServices.evtx") as log:
-        for record in log.records():
+    size = len(list(log.records()))
+    with alive_bar(size, title='远程桌面日志分析进度') as bar:
+        for record,sign in zip(log.records(),range(size)):
             xml = record.xml().replace(''' xmlns="http://schemas.microsoft.com/win/2004/08/events/event"''',"").replace(''' xmlns:auto-ns2="http://schemas.microsoft.com/win/2004/08/events" xmlns="Event_NS"''',"")
             tree = ElementTree.fromstring(xml)
             #事件ID
@@ -148,6 +150,7 @@ with Evtx.Evtx("TerminalServices.evtx") as log:
                 loginip = UserData.find('Param3').text
                 wsmstsc.append([logtime,EventID,str(logincomputer).replace("None",""),str(loginuser).replace("None",""),str(loginip).replace("None","")])
                 iii += 1
+            bar()
         for row in wsmstsc['A2:E{}'.format(iii)]:
             for cell in row:
                 cell.font = font
