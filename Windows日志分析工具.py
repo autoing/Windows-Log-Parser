@@ -43,6 +43,21 @@ wsuser['C1'] = '操作'
 wsuser['D1'] = '账号'
 wsuser['E1'] = '操作账号'
 
+#应用日志
+wb.create_sheet('远程桌面日志')
+wsmstsc = wb.get_sheet_by_name('远程桌面日志')
+wsmstsc.column_dimensions['A'].width = 20
+wsmstsc.column_dimensions['B'].width = 12
+wsmstsc.column_dimensions['C'].width = 12
+wsmstsc.column_dimensions['D'].width = 20
+wsmstsc.column_dimensions['E'].width = 20
+wsmstsc.row_dimensions[1].height = 20
+wsmstsc['A1'] = '时间'
+wsmstsc['B1'] = '事件ID'
+wsmstsc['C1'] = '计算机名'
+wsmstsc['D1'] = '用户名'
+wsmstsc['E1'] = '登录IP'
+
 # 样式
 font = Font(size=10, name='宋体')
 thin = Side(border_style="thin")
@@ -62,12 +77,17 @@ for title_style in wsuser['A1:E1']:
         title_cell.border = border
         title_cell.alignment = alignment
 
-EvtxPath = "Security.evtx"
+for title_style in wsmstsc['A1:E1']:
+    for title_cell in title_style:
+        title_cell.font = title_font
+        title_cell.border = border
+        title_cell.alignment = alignment
+
 i = 1
 ii = 1
-with Evtx.Evtx(EvtxPath) as log:
+with Evtx.Evtx("Security.evtx") as log:
     size = len(list(log.records()))
-    with alive_bar(size, title='分析进度') as bar:
+    with alive_bar(size, title='安全日志分析进度') as bar:
         for record,sign in zip(log.records(),range(size)):
             xml = record.xml().replace(''' xmlns="http://schemas.microsoft.com/win/2004/08/events/event"''',"")
             tree = ElementTree.fromstring(xml)
@@ -111,8 +131,34 @@ with Evtx.Evtx(EvtxPath) as log:
                 cell.font = font
                 cell.border = border
                 cell.alignment = alignment
+iii = 1
+with Evtx.Evtx("TerminalServices.evtx") as log:
+        for record in log.records():
+            xml = record.xml().replace(''' xmlns="http://schemas.microsoft.com/win/2004/08/events/event"''',"").replace(''' xmlns:auto-ns2="http://schemas.microsoft.com/win/2004/08/events" xmlns="Event_NS"''',"")
+            tree = ElementTree.fromstring(xml)
+            #事件ID
+            EventID = tree.findall('System')[0].find('EventID').text
+            if int(EventID) == 1149:
+                logtime = tree.findall('System')[0].find('TimeCreated').attrib['SystemTime'][0:19]
+                logtime = datetime.strptime(logtime, "%Y-%m-%d %H:%M:%S") + timedelta(hours=8)
+
+                UserData = tree.findall('UserData')[0].find('EventXML')
+                loginuser = UserData.find('Param1').text
+                logincomputer = UserData.find('Param2').text
+                loginip = UserData.find('Param3').text
+                wsmstsc.append([logtime,EventID,str(logincomputer).replace("None",""),str(loginuser).replace("None",""),str(loginip).replace("None","")])
+                iii += 1
+        for row in wsmstsc['A2:E{}'.format(iii)]:
+            for cell in row:
+                cell.font = font
+                cell.border = border
+                cell.alignment = alignment
+
+
 wslogin.auto_filter.add_sort_condition('G{}:A2'.format(i))
 wslogin.auto_filter.add_sort_condition('F{}:A2'.format(ii))
+wsmstsc.auto_filter.add_sort_condition('F{}:A2'.format(iii))
+
 wb.save(filename)
 print(f'保存文件：{filename}')
 time.sleep(3)
