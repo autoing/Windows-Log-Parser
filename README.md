@@ -14,6 +14,8 @@ Windows日志分析工具，自动分析事件ID为4624、4625、4720、4725、4
 4624、4625
 
 # 使用说明
-Security.evtx文件放在工具同目录下，双击运行工具即可。
+将安全日志另存为 Security.evtx
+将远程桌面日志另存为 TerminalServices.evtx
+放到程序同目录下，双击运行工具即可。
 
 ![GIF](https://user-images.githubusercontent.com/45142883/153126347-4ccdb999-0889-4595-a66c-8e00c3153ca3.gif)
