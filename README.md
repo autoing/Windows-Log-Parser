@@ -1,6 +1,10 @@
 # Windows-Log-Parser
 Windows日志分析工具，自动分析事件ID为4624、4625、4720、4725、4726的安全日志。
 
+# 1.0211
+改用进度条，直接打印到窗口速度会很慢。
+![GIF](https://user-images.githubusercontent.com/45142883/153532228-fb48dd3b-8cff-4867-a5df-ec035a05532c.gif)
+
 # 1.0209
 支持事件ID：
 4624、4625、4720、4725、4726
